@@ -231,7 +231,6 @@ public final class FileObjectFactory {
         return issueIfExist(file, caller, parent, child, initTouch, caller.asynchFire());
     }
 
-
     /**
      * Check cache consistence. It is called only from assertion, so it can be
      * disabled from command line. Given file should or shouldn't exist
@@ -323,7 +322,7 @@ public final class FileObjectFactory {
                 } else {
                     //!!!!!!!!!!!!!!!!! inconsistence
                     exist = touchExists(file, realExists);
-                    if (!exist && !Files.isSymbolicLink(file.toPath())) {
+                    if (!exist) {
                         refreshFromGetter(parent, asyncFire);
                     }
                 }
@@ -416,7 +415,7 @@ public final class FileObjectFactory {
             state = FileChangedManager.getInstance().exists(f) ? 1 : 0;
         }
         assert state != -1;
-        if (Files.isSymbolicLink(f.toPath())) {
+        if (state == 0 && Files.isSymbolicLink(f.toPath())) {
             state = 1;
         }
         return (state == 1) ? true : false;
