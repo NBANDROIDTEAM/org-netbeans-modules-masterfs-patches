@@ -1,0 +1,38 @@
+From b14fd779652b65d070c00d252517a66edf6f84e0 Mon Sep 17 00:00:00 2001
+From: arsi <arsi@arsi.sk>
+Date: 28.12.2018 12:15:18
+
+fixed problem with files other that Link, File and Dir, recursive Created/Deleted file changed event
+
+
+diff --git a/masterfs/src/org/netbeans/modules/masterfs/filebasedfs/fileobjects/BaseFileObj.java b/masterfs/src/org/netbeans/modules/masterfs/filebasedfs/fileobjects/BaseFileObj.java
+index c01e03d..4f5d5bd 100644
+--- a/masterfs/src/org/netbeans/modules/masterfs/filebasedfs/fileobjects/BaseFileObj.java
++++ b/masterfs/src/org/netbeans/modules/masterfs/filebasedfs/fileobjects/BaseFileObj.java
+@@ -895,7 +895,8 @@
+                     final File file = getFileName().getFile();
+                     final boolean isDir = file.isDirectory();
+                     final boolean isFile = file.isFile();
+-                    if (isDir == isFile || isFolder() != isDir || isData() != isFile) {
++                    final boolean isOther = isOther(file);
++                    if ((isDir == isFile || isFolder() != isDir || isData() != isFile) && !isOther) {
+                         invalidateFO(fire, expected, true);
+                     }
+                 } else if (isData()) {
+@@ -909,6 +910,16 @@
+             stopWatch.stop();
+         }
+     }
++    
++    private static boolean isOther(File file) {
++        boolean other = false;
++        try {
++            other = Files.readAttributes(file.toPath(), BasicFileAttributes.class).isOther();
++        } catch (IOException ex) {
++            Exceptions.printStackTrace(ex);
++        }
++        return other;
++    }
+ 
+     void refreshExistingParent(final boolean expected, boolean fire) {
+         boolean validityFlag = FileChangedManager.getInstance().exists(getFileName().getFile());

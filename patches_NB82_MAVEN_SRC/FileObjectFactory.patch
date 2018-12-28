@@ -1,0 +1,21 @@
+From 0887ac976f7dac16073441d52f57f381cb86641b Mon Sep 17 00:00:00 2001
+From: arsi <arsi@arsi.sk>
+Date: 28.12.2018 12:46:58
+
+fixed problem with broken Symbolic Links, recursive Created/Deleted file changed event
+
+
+diff --git a/masterfs/src/org/netbeans/modules/masterfs/filebasedfs/fileobjects/FileObjectFactory.java b/masterfs/src/org/netbeans/modules/masterfs/filebasedfs/fileobjects/FileObjectFactory.java
+index d7c8354..fddbd35 100644
+--- a/masterfs/src/org/netbeans/modules/masterfs/filebasedfs/fileobjects/FileObjectFactory.java
++++ b/masterfs/src/org/netbeans/modules/masterfs/filebasedfs/fileobjects/FileObjectFactory.java
+@@ -418,6 +418,9 @@
+             state = FileChangedManager.getInstance().exists(f) ? 1 : 0;
+         }
+         assert state != -1;
++        if (state == 0 && Files.isSymbolicLink(f.toPath())) {
++            state = 1;
++        }
+         return (state == 1) ? true : false;
+     }
+ 

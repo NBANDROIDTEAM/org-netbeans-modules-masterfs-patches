@@ -10,6 +10,7 @@
         <module>org-netbeans-modules-masterfs-patch-module</module>
         <module>org-netbeans-modules-versioning-masterfs</module>
         <module>org-netbeans-modules-versioning-masterfs-patch-module</module>
+        <module>NetbeansKiller</module>
     </modules>
     <build>
         <plugins>

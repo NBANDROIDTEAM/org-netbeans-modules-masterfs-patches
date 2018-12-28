@@ -1,0 +1,26 @@
+From c6756f9db92e1c1ce13ed8cebe357f993648fc0f Mon Sep 17 00:00:00 2001
+From: arsi <arsi@arsi.sk>
+Date: 28.12.2018 12:50:02
+
+fixed problem with registering new filechangedlistener, after file delete event
+
+
+diff --git a/versioning.masterfs/src/org/netbeans/modules/versioning/masterfs/FilesystemInterceptor.java b/versioning.masterfs/src/org/netbeans/modules/versioning/masterfs/FilesystemInterceptor.java
+index 409b998..bf69681 100644
+--- a/versioning.masterfs/src/org/netbeans/modules/versioning/masterfs/FilesystemInterceptor.java
++++ b/versioning.masterfs/src/org/netbeans/modules/versioning/masterfs/FilesystemInterceptor.java
+@@ -202,12 +202,12 @@
+ 
+     @Override
+     public void deleteSuccess(FileObject fo) {
+-        VCSFilesystemInterceptor.deleteSuccess(VCSFileProxy.createFileProxy(fo));
++        VCSFilesystemInterceptor.deleteSuccess(VCSFileProxy.createFileProxy(FileUtil.toFile(fo)));
+     }
+ 
+     @Override
+     public void deletedExternally(FileObject fo) {
+-        VCSFilesystemInterceptor.deletedExternally(VCSFileProxy.createFileProxy(fo));
++        VCSFilesystemInterceptor.deletedExternally(VCSFileProxy.createFileProxy(FileUtil.toFile(fo)));
+     }
+     
+     @Override
