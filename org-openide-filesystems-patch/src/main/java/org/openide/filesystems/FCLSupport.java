@@ -43,6 +43,11 @@
  */
 package org.openide.filesystems;
 
+import java.nio.file.Files;
+import java.nio.file.LinkOption;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -88,8 +93,43 @@ class FCLSupport {
         }
     }
 
+    /**
+     * Skip events from broken link and other files
+     *
+     * @see NETBEANS-168
+     * @param fe FileEvent
+     * @param operation Op
+     * @return true for valid event
+     */
+    private static boolean validateEvent(FileEvent fe, Op operation) {
+        try {
+            String url = fe.getFile().toURL().toExternalForm();
+            //handle only real filesystem and CREATED and DELETED events
+            if (operation == Op.FILE_RENAMED
+                    || operation == Op.ATTR_CHANGED
+                    || operation == Op.FILE_CHANGED
+                    || (url != null && !url.startsWith("file:"))) {
+                return true;
+            }
+            Path path = Paths.get(fe.getFile().toURI());
+            if (Files.isSymbolicLink(path) && Files.exists(path, LinkOption.NOFOLLOW_LINKS)) {
+                //broken link, discard event
+                return false;
+            } else if (Files.exists(path, LinkOption.NOFOLLOW_LINKS) && Files.readAttributes(path, BasicFileAttributes.class).isOther()) {
+                //discard event if the file is other that folder, file or link
+                return false;
+            }
+        } catch (Exception e) {
+            Exceptions.printStackTrace(e);
+        }
+        return true;
+    }
+
     final void dispatchEvent(FileEvent fe, Op operation, Collection<Runnable> postNotify) {
         List<FileChangeListener> fcls;
+        if (!validateEvent(fe, operation)) {
+            return;
+        }
 
         synchronized (this) {
             if (listeners == null) {
@@ -105,6 +145,9 @@ class FCLSupport {
     }
 
     static void dispatchEvent(final FileChangeListener fcl, final FileEvent fe, final Op operation, Collection<Runnable> postNotify) {
+        if (!validateEvent(fe, operation)) {
+            return;
+        }
         boolean async = fe.isAsynchronous();
         DispatchEventWrapper dw = new DispatchEventWrapperSingle(fcl, fe, operation);
         dw.dispatchEvent(async, postNotify);
@@ -112,6 +155,9 @@ class FCLSupport {
 
     static void dispatchEvent(Collection<FileChangeListener> listeners,
             final FileEvent fe, final Op operation, Collection<Runnable> postNotify) {
+        if (!validateEvent(fe, operation)) {
+            return;
+        }
         boolean async = fe.isAsynchronous();
         DispatchEventWrapper dw = new DispatchEventWrapperMulti(listeners, fe, operation);
         dw.dispatchEvent(async, postNotify);

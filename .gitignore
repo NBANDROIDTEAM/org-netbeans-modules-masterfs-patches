@@ -1,1 +1,4 @@
 /NetbeansKiller/target/
+/org-openide-filesystems-patch/target/
+/org-openide-filesystems-patch-module/target/
+/org-openide-filesystems-patch/src/main/resources/rebel.xml

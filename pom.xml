@@ -11,6 +11,7 @@
         <module>org-netbeans-modules-versioning-masterfs</module>
         <module>org-netbeans-modules-versioning-masterfs-patch-module</module>
         <module>NetbeansKiller</module>
+        <module>org-openide-filesystems-patch</module>
     </modules>
     <build>
         <plugins>
